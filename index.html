@@ -13,74 +13,35 @@
         margin: 0;
     }
     h1 { color: #333; }
-    
     input, select, button {
-        padding: 12px;
+        padding: 10px;
         margin: 5px 0;
         font-size: 16px;
+        width: 90%;
+        max-width: 300px;
         box-sizing: border-box;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        outline: none;
     }
-
-    button {
-        cursor: pointer;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        width: 95%;
-        max-width: 320px;
-        transition: background-color 0.3s;
-    }
-    button:hover {
-        background-color: #45a049;
-    }
-
+    button { cursor: pointer; }
     .output {
         background: white;
         margin-top: 20px;
         padding: 15px;
-        border-radius: 10px;
+        border-radius: 5px;
         display: inline-block;
         text-align: left;
         min-width: 250px;
         width: 90%;
         max-width: 350px;
     }
-
-    .date-picker {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        flex-wrap: wrap;
-        margin-bottom: 10px;
+    canvas {
+        margin-top: 20px;
+        border: 1px solid #ccc;
+        max-width: 100%;
+        height: auto;
     }
-    .date-picker select {
-        flex: 1;
-        min-width: 100px;
-        max-width: 120px;
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        padding: 12px;
-        font-size: 16px;
-        text-align: center;
-    }
-
     @media (max-width: 400px) {
-        input, select, button {
-            font-size: 14px;
-            padding: 10px;
-        }
-        .output {
-            padding: 10px;
-            font-size: 14px;
-        }
-        .date-picker select {
-            font-size: 14px;
-            padding: 10px;
-        }
+        input, select, button { font-size: 14px; padding: 8px; }
+        .output { padding: 10px; font-size: 14px; }
     }
 </style>
 </head>
@@ -92,15 +53,14 @@
 <input type="text" id="nome" placeholder="Nome">
 <input type="text" id="cognome" placeholder="Cognome"><br>
 
-<div class="date-picker">
-    <select id="giorno"></select>
-    <select id="mese"></select>
-    <select id="anno"></select>
-</div>
+<select id="giorno"></select>
+<select id="mese"></select>
+<select id="anno"></select><br>
 
 <button onclick="calcola()">Calcola</button>
 
 <div id="risultato" class="output"></div>
+<canvas id="canvasNumeri" width="400" height="500"></canvas>
 
 <script>
 function letterToNumber(c) {
@@ -112,8 +72,7 @@ function letterToNumber(c) {
 }
 
 function isVowel(c) {
-    c = c.toUpperCase();
-    return ['A','E','I','O','U'].includes(c);
+    return ['A','E','I','O','U'].includes(c.toUpperCase());
 }
 
 function isSpecial(num) {
@@ -146,17 +105,13 @@ function calcola() {
     for (let c of completo) {
         if (/[a-zA-Z]/.test(c)) {
             let numero = letterToNumber(c);
-            if (isVowel(c))
-                sommaVocali += numero;
-            else
-                sommaConsonanti += numero;
+            if (isVowel(c)) sommaVocali += numero;
+            else sommaConsonanti += numero;
         }
     }
 
     let sommaData = 0;
-    for (let cifra of (""+giorno+mese+anno)) {
-        sommaData += parseInt(cifra);
-    }
+    for (let cifra of (""+giorno+mese+anno)) sommaData += parseInt(cifra);
 
     sommaVocali = riduciNumero(sommaVocali);
     sommaConsonanti = riduciNumero(sommaConsonanti);
@@ -172,6 +127,81 @@ function calcola() {
         <strong>Numero del Destino (data di nascita):</strong> ${sommaData}<br>
         <strong>Quintessenza:</strong> ${quintessenza}
     `;
+
+    let canvas = document.getElementById("canvasNumeri");
+    let ctx = canvas.getContext("2d");
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    let latoGrande = 150;
+    let latoPiccolo = 80;
+    let latoDest = 40;
+    let spazioDest = 10; // distanza dall'angolo esterno del quadrato
+    let centroX = canvas.width / 2;
+    let centroY = canvas.height / 2 + 70;
+
+    // Quadrato grande in basso (Anima)
+    ctx.fillStyle = "rgba(0,0,0,0)";
+    ctx.strokeStyle = "#4CAF50";
+    ctx.lineWidth = 3;
+    ctx.fillRect(centroX - latoGrande/2, centroY - latoGrande/2, latoGrande, latoGrande);
+    ctx.strokeRect(centroX - latoGrande/2, centroY - latoGrande/2, latoGrande, latoGrande);
+
+    // Numero dell'Anima
+    ctx.fillStyle = "#4CAF50";
+    ctx.font = "bold 36px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(sommaVocali, centroX, centroY);
+
+    // Quadrato piccolo DESTINO (fuori il quadrato grande, angolo in alto a sinistra)
+    ctx.fillStyle = "rgba(0,0,0,0)";
+    ctx.strokeStyle = "#9C27B0";
+    ctx.lineWidth = 2;
+    let destX = centroX - latoGrande/2 - latoDest/2 + spazioDest;
+    let destY = centroY - latoGrande/2 - latoDest/2 + spazioDest;
+    ctx.fillRect(destX - latoDest/2, destY - latoDest/2, latoDest, latoDest);
+    ctx.strokeRect(destX - latoDest/2, destY - latoDest/2, latoDest, latoDest);
+
+    // Numero del Destino
+    ctx.fillStyle = "#9C27B0";
+    ctx.font = "bold 20px Arial";
+    ctx.fillText(sommaData, destX, destY);
+
+    // Rettangolo collegamento tra Anima e IO
+    ctx.fillStyle = "rgba(0,0,0,0)";
+    ctx.strokeStyle = "#999";
+    ctx.lineWidth = 2;
+    ctx.fillRect(centroX - 15, centroY - latoGrande/2 - 60, 30, 60);
+    ctx.strokeRect(centroX - 15, centroY - latoGrande/2 - 60, 30, 60);
+
+    // Quadrato piccolo in alto (IO)
+    let quadratoY = centroY - latoGrande/2 - latoPiccolo - 60;
+    ctx.fillStyle = "rgba(0,0,0,0)";
+    ctx.strokeStyle = "#FF5722";
+    ctx.lineWidth = 3;
+    ctx.fillRect(centroX - latoPiccolo/2, quadratoY, latoPiccolo, latoPiccolo);
+    ctx.strokeRect(centroX - latoPiccolo/2, quadratoY, latoPiccolo, latoPiccolo);
+
+    // Numero dell'IO
+    ctx.fillStyle = "#FF5722";
+    ctx.font = "bold 28px Arial";
+    ctx.fillText(sommaVC, centroX, quadratoY + latoPiccolo/2);
+
+    // Triangolo sopra il quadrato piccolo (Persona)
+    ctx.fillStyle = "rgba(0,0,0,0)";
+    ctx.strokeStyle = "#2196F3";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(centroX - latoPiccolo/2, quadratoY); 
+    ctx.lineTo(centroX + latoPiccolo/2, quadratoY);
+    ctx.lineTo(centroX, quadratoY - latoPiccolo/2);
+    ctx.closePath();
+    ctx.stroke();
+
+    // Numero della Persona
+    ctx.fillStyle = "#2196F3";
+    ctx.font = "bold 24px Arial";
+    ctx.fillText(sommaConsonanti, centroX, quadratoY - latoPiccolo/4);
 }
 
 // Popoliamo i menu a tendina
@@ -186,16 +216,16 @@ window.onload = function() {
 
     let meseSelect = document.getElementById("mese");
     const mesi = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
-    mesi.forEach((m, index) => {
+    for (let i=0; i<12; i++) {
         let option = document.createElement("option");
-        option.value = index + 1;
-        option.text = m;
+        option.value = i+1;
+        option.text = mesi[i];
         meseSelect.add(option);
-    });
+    }
 
     let annoSelect = document.getElementById("anno");
-    let currentYear = new Date().getFullYear();
-    for (let i = currentYear; i >= 1900; i--) {
+    let annoCorrente = new Date().getFullYear();
+    for (let i = annoCorrente; i >= 1900; i--) {
         let option = document.createElement("option");
         option.value = i;
         option.text = i;
