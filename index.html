@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Calcolatore Numerologico</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f7f7f7;
+        text-align: center;
+        padding: 20px;
+    }
+    h1 { color: #333; }
+    input, select {
+        padding: 5px;
+        margin: 5px;
+        font-size: 16px;
+    }
+    button {
+        padding: 8px 15px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    .output {
+        background: white;
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        display: inline-block;
+        text-align: left;
+        min-width: 250px;
+    }
+</style>
+</head>
+<body>
+
+<h1>Calcolatore Numerologico</h1>
+<p>Inserisci il tuo nome, cognome e data di nascita</p>
+
+<input type="text" id="nome" placeholder="Nome">
+<input type="text" id="cognome" placeholder="Cognome"><br>
+
+<select id="giorno"></select>
+<select id="mese"></select>
+<select id="anno"></select><br>
+
+<button onclick="calcola()">Calcola</button>
+
+<div id="risultato" class="output"></div>
+
+<script>
+function letterToNumber(c) {
+    c = c.toUpperCase();
+    if (c >= 'A' && c <= 'I') return (c.charCodeAt(0) - 'A'.charCodeAt(0)) + 1;
+    else if (c >= 'J' && c <= 'R') return (c.charCodeAt(0) - 'J'.charCodeAt(0)) + 1;
+    else if (c >= 'S' && c <= 'Z') return (c.charCodeAt(0) - 'S'.charCodeAt(0)) + 1;
+    return 0;
+}
+
+function isVowel(c) {
+    c = c.toUpperCase();
+    return ['A','E','I','O','U'].includes(c);
+}
+
+function isSpecial(num) {
+    let special = [1,2,3,4,5,6,7,8,9, 11,22,33,44, 13,14,16,19];
+    return special.includes(num);
+}
+
+function riduciNumero(num) {
+    while (!isSpecial(num)) {
+        let sommaCifre = 0;
+        while (num > 0) {
+            sommaCifre += num % 10;
+            num = Math.floor(num / 10);
+        }
+        num = sommaCifre;
+    }
+    return num;
+}
+
+function calcola() {
+    let nome = document.getElementById("nome").value.trim();
+    let cognome = document.getElementById("cognome").value.trim();
+    let giorno = parseInt(document.getElementById("giorno").value);
+    let mese = parseInt(document.getElementById("mese").value);
+    let anno = parseInt(document.getElementById("anno").value);
+
+    let completo = nome + cognome;
+    let sommaVocali = 0, sommaConsonanti = 0;
+
+    for (let c of completo) {
+        if (/[a-zA-Z]/.test(c)) {
+            let numero = letterToNumber(c);
+            if (isVowel(c))
+                sommaVocali += numero;
+            else
+                sommaConsonanti += numero;
+        }
+    }
+
+    let sommaData = 0;
+    for (let cifra of (""+giorno+mese+anno)) {
+        sommaData += parseInt(cifra);
+    }
+
+    sommaVocali = riduciNumero(sommaVocali);
+    sommaConsonanti = riduciNumero(sommaConsonanti);
+    sommaData = riduciNumero(sommaData);
+
+    let sommaVC = riduciNumero(sommaVocali + sommaConsonanti);
+    let quintessenza = riduciNumero(sommaVC + sommaData);
+
+    document.getElementById("risultato").innerHTML = `
+        <strong>Numero dell'Anima (vocali):</strong> ${sommaVocali}<br>
+        <strong>Numero della Persona (consonanti):</strong> ${sommaConsonanti}<br>
+        <strong>Numero dell'Io (vocali + consonanti):</strong> ${sommaVC}<br>
+        <strong>Numero del Destino (data di nascita):</strong> ${sommaData}<br>
+        <strong>Quintessenza:</strong> ${quintessenza}
+    `;
+}
+
+// Popoliamo i menu a tendina
+window.onload = function() {
+    let giornoSelect = document.getElementById("giorno");
+    for (let i = 1; i <= 31; i++) {
+        let option = document.createElement("option");
+        option.value = i;
+        option.text = i;
+        giornoSelect.add(option);
+    }
+
+    let meseSelect = document.getElementById("mese");
+    const mesi = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+    mesi.forEach((m, index) => {
+        let option = document.createElement("option");
+        option.value = index + 1;
+        option.text = m;
+        meseSelect.add(option);
+    });
+
+    let annoSelect = document.getElementById("anno");
+    let currentYear = new Date().getFullYear();
+    for (let i = currentYear; i >= 1900; i--) {
+        let option = document.createElement("option");
+        option.value = i;
+        option.text = i;
+        annoSelect.add(option);
+    }
+};
+</script>
+
+</body>
+</html>
