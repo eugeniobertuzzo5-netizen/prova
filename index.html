@@ -5,44 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calcolatore Numerologico</title>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #f7f7f7;
-        text-align: center;
-        padding: 20px;
-        margin: 0;
-    }
+    body { font-family: Arial, sans-serif; background: #f7f7f7; text-align: center; padding: 20px; margin: 0; }
     h1 { color: #333; }
-    input, select, button {
-        padding: 10px;
-        margin: 5px 0;
-        font-size: 16px;
-        width: 90%;
-        max-width: 300px;
-        box-sizing: border-box;
-    }
+    input, select, button { padding: 10px; margin: 5px 0; font-size: 16px; width: 90%; max-width: 300px; box-sizing: border-box; }
     button { cursor: pointer; }
-    .output {
-        background: white;
-        margin-top: 20px;
-        padding: 15px;
-        border-radius: 5px;
-        display: inline-block;
-        text-align: left;
-        min-width: 250px;
-        width: 90%;
-        max-width: 350px;
-    }
-    canvas {
-        margin-top: 20px;
-        border: 1px solid #ccc;
-        max-width: 100%;
-        height: auto;
-    }
-    @media (max-width: 400px) {
-        input, select, button { font-size: 14px; padding: 8px; }
-        .output { padding: 10px; font-size: 14px; }
-    }
+    .output { background: white; margin-top: 20px; padding: 15px; border-radius: 5px; display: inline-block; text-align: left; min-width: 250px; width: 90%; max-width: 350px; }
+    canvas { margin-top: 20px; border: 1px solid #ccc; max-width: 100%; height: auto; }
 </style>
 </head>
 <body>
@@ -70,27 +38,9 @@ function letterToNumber(c) {
     else if (c >= 'S' && c <= 'Z') return (c.charCodeAt(0) - 'S'.charCodeAt(0)) + 1;
     return 0;
 }
-
-function isVowel(c) {
-    return ['A','E','I','O','U'].includes(c.toUpperCase());
-}
-
-function isSpecial(num) {
-    let special = [1,2,3,4,5,6,7,8,9, 11,22,33,44, 13,14,16,19];
-    return special.includes(num);
-}
-
-function riduciNumero(num) {
-    while (!isSpecial(num)) {
-        let sommaCifre = 0;
-        while (num > 0) {
-            sommaCifre += num % 10;
-            num = Math.floor(num / 10);
-        }
-        num = sommaCifre;
-    }
-    return num;
-}
+function isVowel(c) { return ['A','E','I','O','U'].includes(c.toUpperCase()); }
+function isSpecial(num) { let special = [1,2,3,4,5,6,7,8,9,11,22,33,44,13,14,16,19]; return special.includes(num); }
+function riduciNumero(num) { while (!isSpecial(num)) { let sommaCifre = 0; while (num > 0) { sommaCifre += num % 10; num = Math.floor(num / 10); } num = sommaCifre; } return num; }
 
 function calcola() {
     let nome = document.getElementById("nome").value.trim();
@@ -101,7 +51,6 @@ function calcola() {
 
     let completo = nome + cognome;
     let sommaVocali = 0, sommaConsonanti = 0;
-
     for (let c of completo) {
         if (/[a-zA-Z]/.test(c)) {
             let numero = letterToNumber(c);
@@ -121,10 +70,10 @@ function calcola() {
     let quintessenza = riduciNumero(sommaVC + sommaData);
 
     document.getElementById("risultato").innerHTML = `
-        <strong>Numero dell'Anima (vocali):</strong> ${sommaVocali}<br>
-        <strong>Numero della Persona (consonanti):</strong> ${sommaConsonanti}<br>
-        <strong>Numero dell'Io (vocali + consonanti):</strong> ${sommaVC}<br>
-        <strong>Numero del Destino (data di nascita):</strong> ${sommaData}<br>
+        <strong>Numero dell'Anima:</strong> ${sommaVocali}<br>
+        <strong>Numero della Persona:</strong> ${sommaConsonanti}<br>
+        <strong>Numero dell'Io:</strong> ${sommaVC}<br>
+        <strong>Numero del Destino:</strong> ${sommaData}<br>
         <strong>Quintessenza:</strong> ${quintessenza}
     `;
 
@@ -135,7 +84,6 @@ function calcola() {
     let latoGrande = 150;
     let latoPiccolo = 80;
     let latoDest = 40;
-    let spazioDest = 10; // distanza dall'angolo esterno del quadrato
     let centroX = canvas.width / 2;
     let centroY = canvas.height / 2 + 70;
 
@@ -145,27 +93,23 @@ function calcola() {
     ctx.lineWidth = 3;
     ctx.fillRect(centroX - latoGrande/2, centroY - latoGrande/2, latoGrande, latoGrande);
     ctx.strokeRect(centroX - latoGrande/2, centroY - latoGrande/2, latoGrande, latoGrande);
-
-    // Numero dell'Anima
     ctx.fillStyle = "#4CAF50";
     ctx.font = "bold 36px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(sommaVocali, centroX, centroY);
 
-    // Quadrato piccolo DESTINO (fuori il quadrato grande, angolo in alto a sinistra)
+    // Quadratino DESTINO completamente fuori e allineato al lato sinistro del quadrato grande
     ctx.fillStyle = "rgba(0,0,0,0)";
     ctx.strokeStyle = "#9C27B0";
     ctx.lineWidth = 2;
-    let destX = centroX - latoGrande/2 - latoDest/2 + spazioDest;
-    let destY = centroY - latoGrande/2 - latoDest/2 + spazioDest;
-    ctx.fillRect(destX - latoDest/2, destY - latoDest/2, latoDest, latoDest);
-    ctx.strokeRect(destX - latoDest/2, destY - latoDest/2, latoDest, latoDest);
-
-    // Numero del Destino
+    let destX = centroX - latoGrande/2; // lato sinistro allineato al quadrato grande
+    let destY = centroY - latoGrande/2 - latoDest -10; // completamente fuori in alto
+    ctx.fillRect(destX, destY, latoDest, latoDest);
+    ctx.strokeRect(destX, destY, latoDest, latoDest);
     ctx.fillStyle = "#9C27B0";
     ctx.font = "bold 20px Arial";
-    ctx.fillText(sommaData, destX, destY);
+    ctx.fillText(sommaData, destX + latoDest/2, destY + latoDest/2);
 
     // Rettangolo collegamento tra Anima e IO
     ctx.fillStyle = "rgba(0,0,0,0)";
@@ -181,8 +125,6 @@ function calcola() {
     ctx.lineWidth = 3;
     ctx.fillRect(centroX - latoPiccolo/2, quadratoY, latoPiccolo, latoPiccolo);
     ctx.strokeRect(centroX - latoPiccolo/2, quadratoY, latoPiccolo, latoPiccolo);
-
-    // Numero dell'IO
     ctx.fillStyle = "#FF5722";
     ctx.font = "bold 28px Arial";
     ctx.fillText(sommaVC, centroX, quadratoY + latoPiccolo/2);
@@ -197,8 +139,6 @@ function calcola() {
     ctx.lineTo(centroX, quadratoY - latoPiccolo/2);
     ctx.closePath();
     ctx.stroke();
-
-    // Numero della Persona
     ctx.fillStyle = "#2196F3";
     ctx.font = "bold 24px Arial";
     ctx.fillText(sommaConsonanti, centroX, quadratoY - latoPiccolo/4);
@@ -207,30 +147,13 @@ function calcola() {
 // Popoliamo i menu a tendina
 window.onload = function() {
     let giornoSelect = document.getElementById("giorno");
-    for (let i = 1; i <= 31; i++) {
-        let option = document.createElement("option");
-        option.value = i;
-        option.text = i;
-        giornoSelect.add(option);
-    }
-
+    for (let i = 1; i <= 31; i++) { let option = document.createElement("option"); option.value = i; option.text = i; giornoSelect.add(option); }
     let meseSelect = document.getElementById("mese");
     const mesi = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
-    for (let i=0; i<12; i++) {
-        let option = document.createElement("option");
-        option.value = i+1;
-        option.text = mesi[i];
-        meseSelect.add(option);
-    }
-
+    for (let i=0; i<12; i++) { let option = document.createElement("option"); option.value = i+1; option.text = mesi[i]; meseSelect.add(option); }
     let annoSelect = document.getElementById("anno");
     let annoCorrente = new Date().getFullYear();
-    for (let i = annoCorrente; i >= 1900; i--) {
-        let option = document.createElement("option");
-        option.value = i;
-        option.text = i;
-        annoSelect.add(option);
-    }
+    for (let i = annoCorrente; i >= 1900; i--) { let option = document.createElement("option"); option.value = i; option.text = i; annoSelect.add(option); }
 };
 </script>
 
